@@ -132,7 +132,7 @@ a { color: inherit; }
   display: inline-grid; place-items: center; gap: 6px;
   min-width: 40px; height: 40px; padding: 0 8px;
   border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--ink);
-  transition: background 0.15s, color 0.15s;
+  text-decoration: none; transition: background 0.15s, color 0.15s;
 }
 .icon-btn.with-label { display: inline-flex; align-items: center; font-weight: 700; padding: 0 12px; }
 .icon-btn:hover:not(:disabled), .icon-btn.pressed { background: var(--hover); }

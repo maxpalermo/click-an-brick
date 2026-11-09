@@ -1,6 +1,7 @@
 // Phone layout (UX_REVIEW §3.1–3.2): top bar (project menu · undo/redo · share), hotbar,
 // resting bottom bar (Parts · Colour · Build/Select · 3D/2D), contextual bars and sheets.
 import { useEffect, useState } from 'react';
+import { t } from '../i18n';
 import { hasUnsavedChanges, useEditor } from '../model/store';
 import { useArchive } from './archive';
 import { PhotoSheetButton } from '../photo/ui/EntryPoints';
@@ -10,8 +11,8 @@ import { CAMERAS, UndoRedo, toggleView, type EditorCommands } from './EditorChro
 import { actions, canVibrate } from './engineBridge';
 import { partIndex, useCatalog } from './hooks';
 import {
-  IconCheck, IconChevron, IconDuplicate, IconEyedropper, IconExport, IconFit, IconFocus, IconGrid, IconHand, IconImport, IconNew,
-  IconPaint, IconPlace, IconShare, IconVibrate, Logo,
+  IconBack, IconCheck, IconChevron, IconDuplicate, IconEyedropper, IconExport, IconFit, IconFocus, IconGrid, IconHand,
+  IconImport, IconNew, IconPaint, IconPlace, IconShare, IconVibrate, Logo,
 } from './Icons';
 import { Sheet, Spinner } from './Overlays';
 import { ColourSheetBody, Swatch, colorByCode } from './Palette';
@@ -259,6 +260,7 @@ function ProjectMenu({ cmd }: { cmd: EditorCommands }) {
         <div className="list-buttons">
           <button className="btn" onClick={run(cmd.importFile)}><IconImport size={18} /> Import .ldr</button>
           <button className="btn" onClick={run(cmd.exportFile)}><IconExport size={18} /> Export .ldr</button>
+          <a className="btn" href="/"><IconBack size={18} /> {t('nav.scanner')}</a>
         </div>
       </div>
       <div className="sheet-section">

@@ -7,9 +7,9 @@ import { newBuild as startNewBuild, openMyBuilds, saveCurrent, useArchive } from
 import { useEngine } from './context';
 import { exportLdr, pickLdrFile } from './file';
 import {
-  IconBricks, IconCamera, IconDown, IconDownDouble, IconErase, IconExport, IconFit, IconImport, IconLayers,
-  IconMore, IconNew, IconPaint, IconPlace, IconRedo, IconRotate, IconSelect, IconShare, IconUndo, IconUp,
-  IconUpDouble, IconKeyboard, IconGrid, IconCheck, IconDuplicate, Logo,
+  IconBack, IconBricks, IconCamera, IconDown, IconDownDouble, IconErase, IconExport, IconFit, IconImport,
+  IconLayers, IconMore, IconNew, IconPaint, IconPlace, IconRedo, IconRotate, IconSelect, IconShare, IconUndo,
+  IconUp, IconUpDouble, IconKeyboard, IconGrid, IconCheck, IconDuplicate, Logo,
 } from './Icons';
 import { Spinner } from './Overlays';
 import { toast } from './toast';
@@ -286,6 +286,10 @@ export function DesktopTopBar({ cmd }: { cmd: EditorCommands }) {
       <button className="icon-btn shortcuts-btn" onClick={() => openSheet('shortcuts')} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts"><IconKeyboard /></button>
       <button className="btn mybuilds-btn" onClick={cmd.myBuilds} title={t('nav.builds')} aria-label={t('nav.builds')}><IconGrid size={18} /> <span className="mybuilds-label">{t('nav.builds')}</span></button>
       <PhotoTopBarButton />
+      <a className="icon-btn with-label" href="/" title={t('nav.scanner')} aria-label={t('nav.scanner')}>
+        <IconBack />
+        <span>{t('nav.scanner')}</span>
+      </a>
       <Menu title="File" label={t('nav.file')} icon={<IconMore />}>
         {(close) => (
           <>

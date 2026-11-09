@@ -1628,6 +1628,9 @@ export default function App() {
         <span className="logo">🧱 Brick Scanner</span>
         <span className="row gap">
           {status && <span className="small header-stat">{status.inventory.total} pezzi</span>}
+          <a className="header-btn" href="/builder/" title="Costruisci in 3D">
+            <span className="icon">🧩</span> Builder
+          </a>
           <span className="small header-user">{me.username}</span>
         </span>
       </header>
@@ -1639,10 +1642,6 @@ export default function App() {
             <span className="label">{label}</span>
           </button>
         ))}
-        <button type="button" onClick={() => (window.location.href = '/builder/')} title="Costruisci in 3D">
-          <span className="icon">🧩</span>
-          <span className="label">Builder</span>
-        </button>
       </nav>
       <Toast toast={toast} />
     </div>

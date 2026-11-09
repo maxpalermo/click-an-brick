@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Brickyard</title>
+    <meta name="description" content="Build anything with bricks in 3D or 2D, then share it with a friend via a link." />
+    <meta name="theme-color" content="#F6F2EA" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16181D" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Brickyard" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      /* Tiny splash shown until the app boots. */
+      html, body { margin: 0; height: 100%; background: #F6F2EA; }
+      @media (prefers-color-scheme: dark) { html, body { background: #16181D; } }
+      #boot-splash { position: fixed; inset: 0; display: grid; place-items: center; }
+      #boot-splash svg { width: 64px; height: 64px; animation: by-bob 1.2s ease-in-out infinite; }
+      @keyframes by-bob { 50% { transform: translateY(-8px); } }
+    </style>
+  </head>
+  <body>
+    <div id="boot-splash" aria-hidden="true">
+      <svg viewBox="0 0 64 64"><path d="M32 22 6 34v14l26 12 26-12V34z" fill="#B3261E"/><path d="M32 22 6 34l26 12 26-12z" fill="#E5483A"/><path d="M6 34v14l26 12V46z" fill="#C7352A"/><g fill="#FF9C8F"><ellipse cx="32" cy="24" rx="5" ry="2.6"/><ellipse cx="19" cy="30" rx="5" ry="2.6"/><ellipse cx="45" cy="30" rx="5" ry="2.6"/><ellipse cx="32" cy="36" rx="5" ry="2.6"/></g></svg>
+    </div>
+    <div id="root"></div>
+    <noscript>Brickyard needs JavaScript to run.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

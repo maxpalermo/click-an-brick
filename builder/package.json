@@ -1,0 +1,19 @@
+{
+  "name": "click-an-brick-builder",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "app",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,app -c blue,green \"npm run dev -w server\" \"npm run dev -w app\"",
+    "build": "npm run build -w app && npm run build -w server",
+    "start": "npm start -w server",
+    "setup:ldraw": "npm run setup:ldraw -w server",
+    "typecheck": "npm run typecheck -w app && npm run typecheck -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

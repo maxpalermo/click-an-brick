@@ -1,0 +1,90 @@
+import type { BrickColor, CatalogPart } from '../model/types';
+
+/** Hand-picked "Popular" parts, shown by default and used as fallback when the catalog fails. */
+const POPULAR_RAW: Array<[string, string, string]> = [
+  ['3001.dat', 'Brick 2 x 4', 'Brick'],
+  ['3003.dat', 'Brick 2 x 2', 'Brick'],
+  ['3004.dat', 'Brick 1 x 2', 'Brick'],
+  ['3005.dat', 'Brick 1 x 1', 'Brick'],
+  ['3010.dat', 'Brick 1 x 4', 'Brick'],
+  ['3009.dat', 'Brick 1 x 6', 'Brick'],
+  ['3008.dat', 'Brick 1 x 8', 'Brick'],
+  ['3622.dat', 'Brick 1 x 3', 'Brick'],
+  ['3002.dat', 'Brick 2 x 3', 'Brick'],
+  ['2456.dat', 'Brick 2 x 6', 'Brick'],
+  ['3007.dat', 'Brick 2 x 8', 'Brick'],
+  ['2357.dat', 'Brick 2 x 2 Corner', 'Brick'],
+  ['3020.dat', 'Plate 2 x 4', 'Plate'],
+  ['3022.dat', 'Plate 2 x 2', 'Plate'],
+  ['3023.dat', 'Plate 1 x 2', 'Plate'],
+  ['3024.dat', 'Plate 1 x 1', 'Plate'],
+  ['3623.dat', 'Plate 1 x 3', 'Plate'],
+  ['3710.dat', 'Plate 1 x 4', 'Plate'],
+  ['3666.dat', 'Plate 1 x 6', 'Plate'],
+  ['3460.dat', 'Plate 1 x 8', 'Plate'],
+  ['3021.dat', 'Plate 2 x 3', 'Plate'],
+  ['3795.dat', 'Plate 2 x 6', 'Plate'],
+  ['3034.dat', 'Plate 2 x 8', 'Plate'],
+  ['3832.dat', 'Plate 2 x 10', 'Plate'],
+  ['2420.dat', 'Plate 2 x 2 Corner', 'Plate'],
+  ['3031.dat', 'Plate 4 x 4', 'Plate'],
+  ['3032.dat', 'Plate 4 x 6', 'Plate'],
+  ['3035.dat', 'Plate 4 x 8', 'Plate'],
+  ['3958.dat', 'Plate 6 x 6', 'Plate'],
+  ['3036.dat', 'Plate 6 x 8', 'Plate'],
+  ['3070b.dat', 'Tile 1 x 1', 'Tile'],
+  ['3069b.dat', 'Tile 1 x 2', 'Tile'],
+  ['2431.dat', 'Tile 1 x 4', 'Tile'],
+  ['3068b.dat', 'Tile 2 x 2', 'Tile'],
+  ['3040.dat', 'Slope 45 2 x 1', 'Slope'],
+  ['3039.dat', 'Slope 45 2 x 2', 'Slope'],
+  ['3298.dat', 'Slope 33 3 x 2', 'Slope'],
+  ['3665.dat', 'Slope 45 2 x 1 Inverted', 'Slope'],
+  ['3062b.dat', 'Brick 1 x 1 Round', 'Brick'],
+  ['3941.dat', 'Brick 2 x 2 Round', 'Brick'],
+  ['4073.dat', 'Plate 1 x 1 Round', 'Plate'],
+  ['6141.dat', 'Plate 1 x 1 Round', 'Plate'],
+  ['3700.dat', 'Technic Brick 1 x 2 with Hole', 'Technic'],
+];
+
+export const POPULAR_PARTS: CatalogPart[] = POPULAR_RAW.map(([id, name, category]) => ({
+  id,
+  name,
+  category,
+  keywords: [],
+}));
+
+const C = (code: number, name: string, hex: string, alpha = 255, edge = '#333333'): BrickColor => ({
+  code,
+  name,
+  hex,
+  edge,
+  alpha,
+  material: alpha < 255 ? 'transparent' : 'solid',
+});
+
+/** Most-used LEGO colours, in display order. Also the fallback when /api/colors fails. */
+export const COMMON_COLORS: BrickColor[] = [
+  C(15, 'White', '#FFFFFF'),
+  C(0, 'Black', '#1B2A34', 255, '#808080'),
+  C(4, 'Red', '#C91A09'),
+  C(1, 'Blue', '#0055BF'),
+  C(14, 'Yellow', '#F2CD37'),
+  C(2, 'Green', '#237841'),
+  C(25, 'Orange', '#FE8A18'),
+  C(71, 'Light Bluish Grey', '#A0A5A9'),
+  C(72, 'Dark Bluish Grey', '#6C6E68'),
+  C(19, 'Tan', '#E4CD9E'),
+  C(70, 'Reddish Brown', '#582A12'),
+  C(28, 'Dark Tan', '#958A73'),
+  C(85, 'Dark Purple', '#3F3691'),
+  C(26, 'Magenta', '#923978'),
+  C(27, 'Lime', '#BBE90B'),
+  C(73, 'Medium Blue', '#5A93DB'),
+  C(321, 'Dark Azure', '#078BC9'),
+  C(36, 'Trans Red', '#C91A09', 128),
+  C(47, 'Trans Clear', '#FCFCFC', 128),
+  C(33, 'Trans Dark Blue', '#0020A0', 128),
+];
+
+export const COMMON_COLOR_CODES = COMMON_COLORS.map((c) => c.code);

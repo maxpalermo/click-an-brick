@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LDraw test render</title>
+<!--
+  R&D helper (Photo to Bricks model comparison, research/photo2brick/compare.ts): renders an LDraw model as a
+  "product photo" (3/4 view from slightly above, white background, soft shadow) for the image-to-3D test set.
+  Vite dev only (not in the production build: vite builds index.html only).
+  http://localhost:5173/test-render.html?model=<url of .ldr>&view=front|back&size=1024
+  Parts come from /ldraw/ (proxied to the Express server on :8787). Sets document.title = "READY" when done.
+  Screenshot headless: research/photo2brick/render-lego.mjs
+-->
+<style>
+  html, body { margin: 0; background: #fff; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { LDrawLoader } from 'three/examples/jsm/loaders/LDrawLoader.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+const q = new URLSearchParams(location.search);
+const size = Number(q.get('size') || 1024);
+const view = q.get('view') || 'front';
+const az = Number(q.get('az') ?? 35) + (view === 'back' ? 180 : 0);
+const el = Number(q.get('el') ?? 25);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(size, size);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf7f7f5);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const loader = new LDrawLoader();
+loader.setPartsLibraryPath('/ldraw/');
+loader.smoothNormals = true;
+await loader.preloadMaterials('/ldraw/LDConfig.ldr');
+const group = await loader.loadAsync(q.get('model'));
+group.rotation.x = Math.PI; // LDraw: -y is up
+group.traverse((o) => {
+  if (o.isLineSegments) o.visible = false; // real photos have no outlines
+  if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
+});
+scene.add(group);
+group.updateMatrixWorld(true);
+const box = new THREE.Box3().setFromObject(group, true);
+const center = box.getCenter(new THREE.Vector3());
+const sz = box.getSize(new THREE.Vector3());
+const radius = sz.length() / 2;
+group.position.sub(new THREE.Vector3(center.x, box.min.y, center.z));
+
+// ground: white plane that only shows the shadow
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(radius * 40, radius * 40), new THREE.ShadowMaterial({ opacity: 0.22 }));
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0xdddddd, 1.2));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+const a = THREE.MathUtils.degToRad(az + 40);
+sun.position.set(Math.sin(a) * radius * 3, radius * 5, Math.cos(a) * radius * 3);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.radius = 8;
+sun.shadow.blurSamples = 16;
+const s = radius * 2.5;
+Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near: 0.1, far: radius * 20 });
+sun.shadow.bias = -0.0005;
+scene.add(sun);
+
+const cam = new THREE.PerspectiveCamera(30, 1, radius / 20, radius * 50);
+const ar = THREE.MathUtils.degToRad(az), er = THREE.MathUtils.degToRad(el);
+const dist = (radius / Math.sin(THREE.MathUtils.degToRad(15))) * 1.05;
+const target = new THREE.Vector3(0, sz.y / 2, 0);
+cam.position.set(target.x + Math.sin(ar) * Math.cos(er) * dist, target.y + Math.sin(er) * dist, target.z + Math.cos(ar) * Math.cos(er) * dist);
+cam.lookAt(target);
+
+renderer.render(scene, cam);
+document.title = 'READY';
+window.__done = true;
+</script>
+</body>
+</html>

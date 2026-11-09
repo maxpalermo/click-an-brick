@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#F6F2EA"/>
+  <g transform="translate(32 -13) scale(7)">
+    <path d="M32 22 6 34v14l26 12 26-12V34z" fill="#B3261E"/>
+    <path d="M32 22 6 34l26 12 26-12z" fill="#E5483A"/>
+    <path d="M6 34v14l26 12V46z" fill="#C7352A"/>
+    <g fill="#F26B5B" stroke="#B3261E" stroke-width="1.2">
+      <ellipse cx="32" cy="26" rx="5" ry="2.6"/>
+      <ellipse cx="19" cy="32" rx="5" ry="2.6"/>
+      <ellipse cx="45" cy="32" rx="5" ry="2.6"/>
+      <ellipse cx="32" cy="38" rx="5" ry="2.6"/>
+    </g>
+    <g fill="#F7897B">
+      <path d="M27 26v-4h10v4"/><path d="M14 32v-4h10v4"/><path d="M40 32v-4h10v4"/><path d="M27 38v-4h10v4"/>
+    </g>
+    <g fill="#FF9C8F">
+      <ellipse cx="32" cy="22" rx="5" ry="2.6"/>
+      <ellipse cx="19" cy="28" rx="5" ry="2.6"/>
+      <ellipse cx="45" cy="28" rx="5" ry="2.6"/>
+      <ellipse cx="32" cy="34" rx="5" ry="2.6"/>
+    </g>
+  </g>
+</svg>

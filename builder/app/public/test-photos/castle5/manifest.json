@@ -1,0 +1,13 @@
+{
+  "id": "castle5",
+  "mode": "lego",
+  "description": "Owner's LEGO castle, 4 sides + top. Resized copies (long side 1024 px, JPEG q88) of research/photo2brick/live/castle5/photo1..5.jpg; background NOT removed (castle5-submit.js cuts it out with POST /api/photo/segment). Mapping and reasoning: research/photo2brick/live/castle5/views.json.",
+  "views": {
+    "front": { "src": "/test-photos/castle5/front.jpg", "original": "photo1.jpg", "width": 771, "height": 1024 },
+    "right": { "src": "/test-photos/castle5/right.jpg", "original": "photo3.jpg", "width": 771, "height": 1024 },
+    "back": { "src": "/test-photos/castle5/back.jpg", "original": "photo4.jpg", "width": 771, "height": 1024 },
+    "left": { "src": "/test-photos/castle5/left.jpg", "original": "photo2.jpg", "width": 771, "height": 1024 },
+    "top": { "src": "/test-photos/castle5/top.jpg", "original": "photo5.jpg", "width": 794, "height": 1024, "note": "rotated 180° from the original so the model's front is at the bottom edge and its right side on the right (plan view as seen from the front)" }
+  },
+  "licence": "Owner's own photos (private test data)"
+}

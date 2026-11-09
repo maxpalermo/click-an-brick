@@ -1,0 +1,9 @@
+.git
+**/node_modules
+**/dist
+data
+builder/server/ldraw
+builder/server/cache
+builder/server/data
+*.log
+.env

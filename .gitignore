@@ -1,0 +1,9 @@
+data/
+node_modules/
+**/dist/
+__pycache__/
+*.pyc
+.env
+builder/server/ldraw/
+builder/server/cache/
+builder/server/data/

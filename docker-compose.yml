@@ -1,0 +1,21 @@
+services:
+  click-an-brick:
+    build: .
+    image: click-an-brick:latest
+    container_name: click-an-brick
+    restart: unless-stopped
+    ports:
+      - "8070:8000"
+    # .env opzionale: ADMIN_USER, ADMIN_PASSWORD, DEVICE_NAME, REBRICKABLE_API_KEY
+    # (fallback globale), FAL_KEY/STABILITY_KEY/ANTHROPIC_API_KEY (photo-to-bricks reale)
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./data:/data
+      - ldraw:/app/brickyard-server/ldraw
+      - cache:/app/brickyard-server/cache
+
+volumes:
+  ldraw:
+  cache:

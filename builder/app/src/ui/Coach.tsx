@@ -1,5 +1,6 @@
 // Empty-state card and one-time contextual tips (UX_REVIEW §3.9). Touch wording on touch
 // devices, keyboard wording with a mouse.
+import { useState } from 'react';
 import { useEditor } from '../model/store';
 import { openPhotoFlow, usePhotoFlow } from '../photo/ui/store';
 import { useCatalog, partIndex, useMedia } from './hooks';
@@ -53,6 +54,7 @@ export function Tip() {
 
 /** "Let's build!" card while the build is empty (§3.9, wireframe 08). */
 export function EmptyState({ onOpen }: { onOpen(): void }) {
+  const [dismissed, setDismissed] = useState(false);
   const empty = useEditor((s) => s.model.bricks.length === 0 && !s.readOnly);
   const part = useEditor((s) => s.activePart);
   const code = useEditor((s) => s.activeColor);
@@ -63,12 +65,20 @@ export function EmptyState({ onOpen }: { onOpen(): void }) {
   const colors = useColors();
   const { parts } = useCatalog();
   const touch = useIsTouch();
-  if (!empty || pending || photoOpen || buildsOpen || sheet) return null;
+  if (!empty || pending || photoOpen || buildsOpen || sheet || dismissed) return null;
   const name = part ? partIndex(parts).get(part.toLowerCase())?.name ?? POPULAR_PARTS.find((p) => p.id === part)?.name : undefined;
   const label = name ? partLabel(name).split(' ').slice(0, 2).join(' ').toLowerCase() : 'brick';
   const colour = colorByCode(colors, code)?.name.toLowerCase() ?? '';
   return (
     <div className="empty-state panel" role="note">
+      <button
+        className="empty-close"
+        aria-label="Close"
+        title="Close"
+        onClick={() => setDismissed(true)}
+      >
+        ✕
+      </button>
       <div className="empty-target" aria-hidden="true" />
       <strong>Let's build!</strong>
       {touch ? (

@@ -644,6 +644,13 @@ kbd {
   width: min(340px, calc(100% - 32px)); padding: 20px 20px 16px; text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fade 0.3s ease-out;
 }
+.empty-close {
+  position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: transparent; border-radius: 8px; cursor: pointer;
+  font-size: 14px; color: var(--ink-2);
+}
+.empty-close:hover { background: rgba(0, 0, 0, 0.06); }
 .empty-state strong { font-size: 22px; }
 .empty-state p { color: var(--ink-2); font-size: 15px; line-height: 1.45; }
 .empty-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }

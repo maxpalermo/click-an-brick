@@ -1363,6 +1363,22 @@ function SettingsView({ status, refresh, notify, me, onLogout }) {
           <input ref={restoreRef} type="file" accept=".zip" hidden onChange={(e) => e.target.files[0] && restore(e.target.files[0])} />
         </div>
       </div>
+
+      <div className="card">
+        <h3>❤️ Sostieni il progetto</h3>
+        <p className="muted small">
+          Click an' Brick è gratuito, senza pubblicità e gira sul tuo hardware — i tuoi dati restano tuoi. Se ti è utile,
+          un caffè aiuta a sostenere lo sviluppo.
+        </p>
+        <a
+          className="button"
+          href="https://www.paypal.com/donate/?hosted_button_id=NXCPHYGNR3S8G"
+          target="_blank"
+          rel="noreferrer"
+        >
+          ☕ Offri un caffè (PayPal)
+        </a>
+      </div>
     </div>
   )
 }

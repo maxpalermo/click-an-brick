@@ -47,6 +47,12 @@ docker compose up -d --build
 - `part_map`/`color_map` sono le tabelle ponte LDraw↔Rebrickable, risolte lazy:
   base per la feature "questo modello ce l'ho nei pezzi?".
 
+## Sostieni il progetto
+
+Click an' Brick è gratuito, senza pubblicità e self-hosted — i tuoi dati restano
+tuoi. Se ti è utile, [offri un caffè via PayPal](https://www.paypal.com/donate/?hosted_button_id=NXCPHYGNR3S8G)
+per sostenere lo sviluppo. 🧱
+
 ## Progetti di origine
 
 - `rebrick-me/` — Brick Scanner (inalterato)

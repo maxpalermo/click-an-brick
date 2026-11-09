@@ -21,6 +21,8 @@ import {
 
 const IDENTITY: Mat3 = [1, 0, 0, 0, 1, 0, 0, 0, 1];
 const CLICK_PX = 5;
+/** Finger taps wiggle far more than a mouse click — beyond this it is an orbit/drag, not a tap. */
+const TOUCH_TAP_PX = 24;
 const ORTHO_HALF = 240;
 const BASE_STUDS = 48;
 const BASE_SIZE = BASE_STUDS * 20;
@@ -1215,7 +1217,8 @@ export function createEngine(opts: EngineOptions): BrickyardEngine {
   function moveHandleDrag(ev: PointerEvent) {
     const hd = handleDrag;
     if (!hd) return;
-    if (!hd.moved && Math.hypot(ev.clientX - hd.x, ev.clientY - hd.y) >= CLICK_PX) hd.moved = true;
+    const slop = ev.pointerType === 'touch' ? TOUCH_TAP_PX : CLICK_PX;
+    if (!hd.moved && Math.hypot(ev.clientX - hd.x, ev.clientY - hd.y) >= slop) hd.moved = true;
     if (!hd.moved) return;
     let next: Item[];
     let key: string;
@@ -1488,7 +1491,8 @@ export function createEngine(opts: EngineOptions): BrickyardEngine {
       && Math.hypot(ev.clientX - longPress.x, ev.clientY - longPress.y) >= LONG_PRESS_PX) clearLongPress();
     if (press?.longPressed) return;
     if (press && press.pointerId === ev.pointerId && !press.moved) {
-      if (Math.hypot(ev.clientX - press.x, ev.clientY - press.y) >= CLICK_PX) press.moved = true;
+      const slop = ev.pointerType === 'touch' ? TOUCH_TAP_PX : CLICK_PX;
+      if (Math.hypot(ev.clientX - press.x, ev.clientY - press.y) >= slop) press.moved = true;
     }
     if (drag && press && press.pointerId === ev.pointerId) {
       if (press.moved) moveDrag(ev.clientX, ev.clientY, ev.altKey);
@@ -1517,7 +1521,8 @@ export function createEngine(opts: EngineOptions): BrickyardEngine {
       try { canvas.releasePointerCapture(ev.pointerId); } catch { /* ignore */ }
       const { lx, ly } = localXY(ev);
       const pk = viewCube.pick(lx, ly);
-      if (pk && Math.hypot(ev.clientX - cp.x, ev.clientY - cp.y) < 12) cubeTap(pk.dir);
+      const slop = ev.pointerType === 'touch' ? TOUCH_TAP_PX : 12;
+      if (pk && Math.hypot(ev.clientX - cp.x, ev.clientY - cp.y) < slop) cubeTap(pk.dir);
       return;
     }
     if (handleDrag && handleDrag.pointerId === ev.pointerId) {

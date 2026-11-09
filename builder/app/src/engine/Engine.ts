@@ -1415,7 +1415,16 @@ export function createEngine(opts: EngineOptions): BrickyardEngine {
       dirty = true;
       return;
     }
-    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    if (ev.pointerType === 'mouse' && ev.button !== 0) {
+      // Right-click in place mode = quick erase (click only; right-drag still pans).
+      if (ev.button === 2) {
+        const st0 = get();
+        if (!st0.readOnly && st0.tool === 'place') {
+          press = { pointerId: ev.pointerId, x: ev.clientX, y: ev.clientY, moved: false, shift: false, toggleOff: null };
+        }
+      }
+      return;
+    }
     const st = get();
     if (!st.readOnly) {
       // gizmo handles win over everything else (and keep the camera still)
@@ -1573,6 +1582,13 @@ export function createEngine(opts: EngineOptions): BrickyardEngine {
     const x = ev.clientX;
     const y = ev.clientY;
     const dbl = isDoubleTap(x, y);
+    if (ev.button === 2) {
+      if (st.tool === 'place' && !st.readOnly) {
+        const hit = pickBrick(x, y);
+        if (hit) st.removeBricks([hit.id]);
+      }
+      return;
+    }
     if (st.readOnly) {
       if (dbl) focusAt(x, y);
       return;

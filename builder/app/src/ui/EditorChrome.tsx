@@ -286,9 +286,8 @@ export function DesktopTopBar({ cmd }: { cmd: EditorCommands }) {
       <button className="icon-btn shortcuts-btn" onClick={() => openSheet('shortcuts')} title={t('top.shortcuts')} aria-label={t('ed.shortcuts')}><IconKeyboard /></button>
       <button className="btn mybuilds-btn" onClick={cmd.myBuilds} title={t('nav.builds')} aria-label={t('nav.builds')}><IconGrid size={18} /> <span className="mybuilds-label">{t('nav.builds')}</span></button>
       <PhotoTopBarButton />
-      <a className="icon-btn with-label" href="/" title={t('nav.scanner')} aria-label={t('nav.scanner')}>
-        <IconBack />
-        <span>{t('nav.scanner')}</span>
+      <a className="btn" href="/" title={t('nav.scanner')} aria-label={t('nav.scanner')}>
+        <IconBack size={18} /> <span className="mybuilds-label">{t('nav.scanner')}</span>
       </a>
       <Menu title={t('nav.file')} label={t('nav.file')} icon={<IconMore />}>
         {(close) => (

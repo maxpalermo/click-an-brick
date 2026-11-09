@@ -1,5 +1,6 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import type { BrickColor } from '../model/types';
+import { t } from '../i18n';
 import { useEditor } from '../model/store';
 import { useColors } from './context';
 import { COMMON_COLORS, COMMON_COLOR_CODES } from './data';
@@ -87,7 +88,7 @@ export function Palette({ compact, onPicked }: { compact?: boolean; onPicked?: (
         </span>
         {groups.length > 0 && (
           <button className="link-btn" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
-            All colours <IconChevron size={16} className={showAll ? 'flip' : ''} />
+            {t('palette.allcolours')} <IconChevron size={16} className={showAll ? 'flip' : ''} />
           </button>
         )}
       </div>
@@ -152,7 +153,7 @@ export function ColourSheetBody({ onPicked }: { onPicked(keepOpen: boolean): voi
       </div>
       {recentColors.length > 1 && (
         <>
-          <div className="sheet-label">Recent</div>
+          <div className="sheet-label">{t('palette.recent')}</div>
           <div className="swatches big">
             {recentColors.map((c) => <Swatch key={c.code} color={c} active={c.code === activeColor} onClick={() => choose(c.code)} />)}
           </div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { lang, setLang, t } from '../i18n';
 import type { Tool } from '../model/types';
 import { BRICK_H, PLATE_H } from '../model/types';
 import { hasUnsavedChanges, useEditor } from '../model/store';
@@ -283,13 +284,13 @@ export function DesktopTopBar({ cmd }: { cmd: EditorCommands }) {
       </button>
       <div className="spacer" />
       <button className="icon-btn shortcuts-btn" onClick={() => openSheet('shortcuts')} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts"><IconKeyboard /></button>
-      <button className="btn mybuilds-btn" onClick={cmd.myBuilds} title="My builds" aria-label="My builds"><IconGrid size={18} /> <span className="mybuilds-label">My builds</span></button>
+      <button className="btn mybuilds-btn" onClick={cmd.myBuilds} title={t('nav.builds')} aria-label={t('nav.builds')}><IconGrid size={18} /> <span className="mybuilds-label">{t('nav.builds')}</span></button>
       <PhotoTopBarButton />
-      <Menu title="File" label="File" icon={<IconMore />}>
+      <Menu title="File" label={t('nav.file')} icon={<IconMore />}>
         {(close) => (
           <>
             <button role="menuitem" onClick={() => { close(); cmd.newBuild(); }}><IconNew size={18} /> New build</button>
-            <button role="menuitem" onClick={() => { close(); cmd.myBuilds(); }}><IconGrid size={18} /> My builds…</button>
+            <button role="menuitem" onClick={() => { close(); cmd.myBuilds(); }}><IconGrid size={18} /> {t('nav.builds')}…</button>
             <button role="menuitem" onClick={() => { close(); cmd.save(); }}><IconCheck size={18} /> Save <span className="menu-key">Ctrl+S</span></button>
             <button role="menuitem" onClick={() => { close(); cmd.saveAsCopy(); }}><IconDuplicate size={18} /> Save as copy</button>
             <div className="menu-sep" role="separator" />
@@ -305,7 +306,8 @@ export function DesktopTopBar({ cmd }: { cmd: EditorCommands }) {
         )}
       </Menu>
       <button className="btn primary" onClick={cmd.share}>
-        <IconShare size={18} /> Share
+        <IconShare size={18} /> {t('nav.share')}
+      <button className="icon-btn" onClick={() => { setLang(lang() === 'it' ? 'en' : 'it'); location.reload(); }} title={t('lang.label')} aria-label={t('lang.label')} style={{ fontWeight: 700, fontSize: 11 }}>{lang().toUpperCase()}</button>
       </button>
     </header>
   );

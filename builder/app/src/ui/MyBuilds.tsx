@@ -1,5 +1,6 @@
 // "My builds": the per-user archive of builds (api/builds.ts), as a full-screen page over the editor.
 import { useEffect, useRef, useState } from 'react';
+import { t } from '../i18n';
 import { ApiError, buildsErrorMessage, createBuild, deleteBuild, getBuild, listBuilds, updateBuild } from '../api/builds';
 import { BUILD_NAME_MAX, type BuildSummary } from '../api/builds.types';
 import { hasUnsavedChanges, useEditor } from '../model/store';
@@ -123,13 +124,13 @@ function MyBuilds() {
   const hasBricks = useEditor((s) => s.model.bricks.length > 0);
 
   return (
-    <div className="mb-screen" role="dialog" aria-modal="true" aria-label="My builds">
+    <div className="mb-screen" role="dialog" aria-modal="true" aria-label={t('builds.title')}>
       <header className="mb-head">
         <button className="icon-btn mb-back" onClick={closeMyBuilds} aria-label="Back to the editor" title="Back to the editor (Esc)">
           <IconBack />
         </button>
         <div className="mb-title">
-          <h1>My builds</h1>
+          <h1>{t('builds.title')}</h1>
           <small>
             {state.kind === 'ready'
               ? `${count} build${count === 1 ? '' : 's'}${count >= state.limit * 0.8 ? ` of ${state.limit}` : ''} · on all your devices`

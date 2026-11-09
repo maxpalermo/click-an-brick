@@ -1,6 +1,7 @@
 // Empty-state card and one-time contextual tips (UX_REVIEW §3.9). Touch wording on touch
 // devices, keyboard wording with a mouse.
 import { useState } from 'react';
+import { useT } from '../i18n';
 import { useEditor } from '../model/store';
 import { openPhotoFlow, usePhotoFlow } from '../photo/ui/store';
 import { useCatalog, partIndex, useMedia } from './hooks';
@@ -54,6 +55,7 @@ export function Tip() {
 
 /** "Let's build!" card while the build is empty (§3.9, wireframe 08). */
 export function EmptyState({ onOpen }: { onOpen(): void }) {
+  const t = useT();
   const [dismissed, setDismissed] = useState(false);
   const empty = useEditor((s) => s.model.bricks.length === 0 && !s.readOnly);
   const part = useEditor((s) => s.activePart);
@@ -80,20 +82,20 @@ export function EmptyState({ onOpen }: { onOpen(): void }) {
         ✕
       </button>
       <div className="empty-target" aria-hidden="true" />
-      <strong>Let's build!</strong>
+      <strong>{t('welcome.title')}</strong>
       {touch ? (
         <p>
-          Tap the grid to drop a {colour} {label}.<br />Adjust it, then tap it again to place.
+          {t('welcome.tap', { colour, label })}<br />{t('welcome.adjust')}
         </p>
       ) : (
         <p>
-          Click the grid to place a {colour} {label}.<br />Shift-click to preview it first.
+          {t('welcome.click', { colour, label })}<br />{t('welcome.shift')}
         </p>
       )}
       <div className="empty-actions">
-        <button className="btn" onClick={openPhotoFlow}><IconPhoto size={18} /> From a photo</button>
-        <button className="btn" onClick={openMyBuilds}><IconGrid size={18} /> My builds</button>
-        <button className="btn" onClick={onOpen}><IconImport size={18} /> Open .ldr</button>
+        <button className="btn" onClick={openPhotoFlow}><IconPhoto size={18} /> {t('welcome.photo')}</button>
+        <button className="btn" onClick={openMyBuilds}><IconGrid size={18} /> {t('welcome.mybuilds')}</button>
+        <button className="btn" onClick={onOpen}><IconImport size={18} /> {t('welcome.openldr')}</button>
       </div>
     </div>
   );

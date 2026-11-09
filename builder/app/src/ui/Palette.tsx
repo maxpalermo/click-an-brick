@@ -1,6 +1,6 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import type { BrickColor } from '../model/types';
-import { t } from '../i18n';
+import { t, tp } from '../i18n';
 import { useEditor } from '../model/store';
 import { useColors } from './context';
 import { COMMON_COLORS, COMMON_COLOR_CODES } from './data';
@@ -65,9 +65,9 @@ export function Palette({ compact, onPicked }: { compact?: boolean; onPicked?: (
     const trans = rest.filter((c) => c.material === 'transparent' || (c.alpha < 255 && !c.material));
     const special = rest.filter((c) => !solid.includes(c) && !trans.includes(c));
     return [
-      { name: 'Solid', list: solid },
-      { name: 'Transparent', list: trans },
-      { name: 'Metallic & special', list: special },
+      { name: t('palette.group.solid'), list: solid },
+      { name: t('palette.group.trans'), list: trans },
+      { name: t('palette.group.special'), list: special },
     ].filter((g) => g.list.length);
   }, [colors]);
 
@@ -84,7 +84,7 @@ export function Palette({ compact, onPicked }: { compact?: boolean; onPicked?: (
       <div className="palette-head">
         <span className="palette-current">
           {active && <Swatch color={active} size={18} />}
-          <span>{active?.name ?? `Colour ${activeColor}`}</span>
+          <span>{active?.name ?? `${t('palette.colour')} ${activeColor}`}</span>
         </span>
         {groups.length > 0 && (
           <button className="link-btn" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
@@ -147,8 +147,8 @@ export function ColourSheetBody({ onPicked }: { onPicked(keepOpen: boolean): voi
       <div className="colour-current">
         {active && <Swatch color={active} size={44} />}
         <div>
-          <strong>{active?.name ?? `Colour ${activeColor}`}</strong>
-          <small>LDraw {activeColor}{selCount && !pending ? ` · recolouring ${selCount} brick${selCount === 1 ? '' : 's'}` : ''}</small>
+          <strong>{active?.name ?? `${t('palette.colour')} ${activeColor}`}</strong>
+          <small>LDraw {activeColor}{selCount && !pending ? ` · ${tp('palette.recolouring', selCount)}` : ''}</small>
         </div>
       </div>
       {recentColors.length > 1 && (
@@ -159,27 +159,27 @@ export function ColourSheetBody({ onPicked }: { onPicked(keepOpen: boolean): voi
           </div>
         </>
       )}
-      <div className="sheet-label">Common</div>
+      <div className="sheet-label">{t('palette.common')}</div>
       <div className="swatches big">
         {common.map((c) => <Swatch key={c.code} color={c} active={c.code === activeColor} onClick={() => choose(c.code)} />)}
       </div>
-      <div className="segmented colour-tabs" role="tablist" aria-label="Material">
+      <div className="segmented colour-tabs" role="tablist" aria-label={t('palette.colour')}>
         {(
           [
-            ['solid', 'Solid'],
-            ['trans', 'Trans'],
-            ['metal', 'Metallic'],
-            ['all', 'All'],
+            ['solid', 'palette.tab.solid'],
+            ['trans', 'palette.tab.trans'],
+            ['metal', 'palette.tab.metal'],
+            ['all', 'palette.tab.all'],
           ] as Array<[MatTab, string]>
-        ).map(([id, label]) => (
+        ).map(([id, key]) => (
           <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}>
-            {label}
+            {t(key)}
           </button>
         ))}
       </div>
       <div className="swatches big">
         {list.map((c) => <Swatch key={c.code} color={c} active={c.code === activeColor} onClick={() => choose(c.code)} />)}
-        {!list.length && <span className="muted">No more colours here.</span>}
+        {!list.length && <span className="muted">{t('palette.nomore')}</span>}
       </div>
     </div>
   );

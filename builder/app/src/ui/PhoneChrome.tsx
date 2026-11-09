@@ -1,7 +1,7 @@
 // Phone layout (UX_REVIEW §3.1–3.2): top bar (project menu · undo/redo · share), hotbar,
 // resting bottom bar (Parts · Colour · Build/Select · 3D/2D), contextual bars and sheets.
 import { useEffect, useState } from 'react';
-import { t } from '../i18n';
+import { t, tp } from '../i18n';
 import { hasUnsavedChanges, useEditor } from '../model/store';
 import { useArchive } from './archive';
 import { PhotoSheetButton } from '../photo/ui/EntryPoints';
@@ -22,7 +22,7 @@ import { closeSheet, openSheet, usePrefs, useUi } from './prefs';
 import { Thumb } from './Thumb';
 
 /** "3 selected · 2x4 Brick ×2, 1x2 Plate" / "12 bricks" / "Loading 3 parts…" */
-function useSubtitle(): string {
+function useSubtitle(): { text: string; loading: boolean } {
   const engine = useEngine();
   const count = useEditor((s) => s.model.bricks.length);
   const sel = useEditor((s) => s.selection);
@@ -46,11 +46,11 @@ function useSubtitle(): string {
         return n > 1 ? `${l} ×${n}` : l;
       })
       .join(', ');
-    return `${sel.length} selected · ${desc}${counts.size > 2 ? '…' : ''}`;
+    return { text: `${tp('status.selected', sel.length)} · ${desc}${counts.size > 2 ? '…' : ''}`, loading: false };
   }
-  if (loading) return `Loading ${loading} part${loading === 1 ? '' : 's'}…`;
-  const status = saving ? 'Saving…' : linked ? (unsaved ? 'Unsaved changes' : 'Saved') : count ? 'Not saved yet' : 'tap for menu';
-  return `${count.toLocaleString()} brick${count === 1 ? '' : 's'} · ${status}`;
+  if (loading) return { text: t('status.loading', { n: loading }), loading: true };
+  const status = saving ? t('save.saving') : linked ? (unsaved ? t('save.unsaved') : t('save.saved')) : count ? t('save.notsaved') : t('ph.tapmenu');
+  return { text: `${tp('status.bricks', count)} · ${status}`, loading: false };
 }
 
 function PhoneTopBar({ cmd }: { cmd: EditorCommands }) {
@@ -58,16 +58,16 @@ function PhoneTopBar({ cmd }: { cmd: EditorCommands }) {
   const subtitle = useSubtitle();
   return (
     <header className="topbar phone panel" data-inset="top">
-      <button className="project-btn" onClick={() => openSheet('menu')} aria-label={`Project menu: ${name}`} aria-haspopup="dialog">
+      <button className="project-btn" onClick={() => openSheet('menu')} aria-label={`${t('pm.project')}: ${name}`} aria-haspopup="dialog">
         <Logo size={30} />
         <span className="project-text">
           <strong>{name || 'My build'}</strong>
-          <small>{subtitle.startsWith('Loading') && <Spinner size={10} />} {subtitle}</small>
+          <small>{subtitle.loading && <Spinner size={10} />} {subtitle.text}</small>
         </span>
         <IconChevron size={16} />
       </button>
       <UndoRedo />
-      <button className="icon-btn accent" onClick={cmd.share} aria-label="Share"><IconShare /></button>
+      <button className="icon-btn accent" onClick={cmd.share} aria-label={t('nav.share')}><IconShare /></button>
     </header>
   );
 }
@@ -80,12 +80,12 @@ function ModeSwitch() {
     s.setTool(t);
   };
   return (
-    <div className="mode-switch" role="radiogroup" aria-label="Mode">
+    <div className="mode-switch" role="radiogroup" aria-label={t('view.mode')}>
       <button role="radio" aria-checked={tool === 'place'} className={tool === 'place' ? 'active' : ''} onClick={() => set('place')}>
-        <IconPlace size={20} /> Build
+        <IconPlace size={20} /> {t('ph.build')}
       </button>
       <button role="radio" aria-checked={tool === 'select'} className={tool === 'select' ? 'active' : ''} onClick={() => set('select')}>
-        <IconHand size={20} /> Select
+        <IconHand size={20} /> {t('ph.select')}
       </button>
     </div>
   );
@@ -99,18 +99,18 @@ function BottomBar() {
   const color = colorByCode(colors, activeColor);
   return (
     <nav className="bottombar panel" aria-label="Editor">
-      <button className="tb-btn" onClick={() => openSheet('parts')} aria-label="Parts">
+      <button className="tb-btn" onClick={() => openSheet('parts')} aria-label={t('ph.parts')}>
         {activePart ? <Thumb part={activePart} color={activeColor} size={96} className="tb-thumb" /> : <span className="tb-thumb" />}
-        <span>Parts</span>
+        <span>{t('ph.parts')}</span>
       </button>
-      <button className="tb-btn" onClick={() => openSheet('colors')} aria-label={`Colour: ${color?.name ?? activeColor}`}>
+      <button className="tb-btn" onClick={() => openSheet('colors')} aria-label={`${t('ph.colour')}: ${color?.name ?? activeColor}`}>
         {color ? <Swatch color={color} size={26} /> : <span className="swatch" />}
-        <span>{color?.name ?? 'Colour'}</span>
+        <span>{color?.name ?? t('ph.colour')}</span>
       </button>
       <ModeSwitch />
-      <button className="tb-btn" onClick={toggleView} aria-label={`View: ${viewMode.toUpperCase()} (tap to switch)`}>
+      <button className="tb-btn" onClick={toggleView} aria-label={`${t('ph.view')}: ${viewMode.toUpperCase()}`}>
         <span className="tb-mode">{viewMode.toUpperCase()}</span>
-        <span>View</span>
+        <span>{t('ph.view')}</span>
       </button>
     </nav>
   );
@@ -123,8 +123,8 @@ function ToolBanner() {
   return (
     <div className="bar-tags">
       <span className="bar-tag info">
-        {tool === 'paint' ? 'Paint brush · tap bricks to paint them' : 'Eraser · tap bricks to remove them'}
-        <button onClick={() => useEditor.getState().setTool('place')}>Done</button>
+        {tool === 'paint' ? t('ph.paint.banner') : t('ph.erase.banner')}
+        <button onClick={() => useEditor.getState().setTool('place')}>{t('ctx.done')}</button>
       </span>
     </div>
   );
@@ -152,12 +152,12 @@ export function PhoneChrome({ cmd }: { cmd: EditorCommands }) {
         </div>
       )}
       {sheet === 'parts' && (
-        <Sheet title="Parts" half onClose={closeSheet} className="sheet-parts">
+        <Sheet title={t('ph.parts')} half onClose={closeSheet} className="sheet-parts">
           <PartPicker onPicked={closeSheet} />
         </Sheet>
       )}
       {sheet === 'colors' && (
-        <Sheet title="Colour" half seeThrough onClose={closeSheet}>
+        <Sheet title={t('ph.colour')} half seeThrough onClose={closeSheet}>
           <ColourSheetBody onPicked={(keep) => !keep && !useUi.getState().pending.active && closeSheet()} />
         </Sheet>
       )}
@@ -176,17 +176,17 @@ function SelectionMore() {
     f();
   };
   return (
-    <Sheet title="Selection" onClose={closeSheet}>
+    <Sheet title={t('ph.sheet.selection')} onClose={closeSheet}>
       <div className="list-buttons one">
-        <button className="btn" onClick={run(actions.usePartOfSelection)}><IconEyedropper size={18} /> Use this part &amp; colour</button>
-        <button className="btn" onClick={run(actions.selectSameColour)}><IconPaint size={18} /> Select same colour</button>
-        <button className="btn" onClick={run(actions.selectAll)}><IconHand size={18} /> Select all</button>
-        <button className="btn" onClick={run(() => actions.frameSelection(engine))}><IconFocus size={18} /> Frame selection</button>
+        <button className="btn" onClick={run(actions.usePartOfSelection)}><IconEyedropper size={18} /> {t('sel.use')}</button>
+        <button className="btn" onClick={run(actions.selectSameColour)}><IconPaint size={18} /> {t('sel.same')}</button>
+        <button className="btn" onClick={run(actions.selectAll)}><IconHand size={18} /> {t('sel.all')}</button>
+        <button className="btn" onClick={run(() => actions.frameSelection(engine))}><IconFocus size={18} /> {t('sel.frame')}</button>
         <label className="toggle-row">
           <input type="checkbox" checked={nudge} onChange={(e) => setPref('nudgeForSelection', e.target.checked)} />
-          <span>Show the nudge pad for selections</span>
+          <span>{t('sel.nudge')}</span>
         </label>
-        <button className="btn" onClick={run(() => useEditor.getState().select([]))}>Deselect</button>
+        <button className="btn" onClick={run(() => useEditor.getState().select([]))}>{t('sel.deselect')}</button>
       </div>
     </Sheet>
   );
@@ -210,9 +210,9 @@ function ProjectMenu({ cmd }: { cmd: EditorCommands }) {
     f();
   };
   return (
-    <Sheet title="Project" onClose={() => { commitName(); closeSheet(); }}>
+    <Sheet title={t('pm.project')} onClose={() => { commitName(); closeSheet(); }}>
       <div className="sheet-section">
-        <label className="sheet-label" htmlFor="pm-name">Name · {count.toLocaleString()} brick{count === 1 ? '' : 's'}</label>
+        <label className="sheet-label" htmlFor="pm-name">{t('pm.name')} · {tp('status.bricks', count)}</label>
         <input
           id="pm-name"
           className="text-input"
@@ -225,63 +225,63 @@ function ProjectMenu({ cmd }: { cmd: EditorCommands }) {
         />
       </div>
       <div className="sheet-section">
-        <div className="sheet-label">Build</div>
+        <div className="sheet-label">{t('pm.build')}</div>
         <button className="btn mybuilds-sheet-btn" onClick={run(cmd.myBuilds)}>
           <span className="mybuilds-sheet-icon"><IconGrid size={22} /></span>
           <span className="mybuilds-sheet-text">
-            <strong>My builds</strong>
-            <small>Your saved builds, on every device</small>
+            <strong>{t('nav.builds')}</strong>
+            <small>{t('pm.subtitle')}</small>
           </span>
         </button>
         <div className="list-buttons">
-          <button className="btn" onClick={run(cmd.save)}><IconCheck size={18} /> Save</button>
-          <button className="btn" onClick={run(cmd.saveAsCopy)}><IconDuplicate size={18} /> Save as copy</button>
-          <button className="btn" onClick={run(cmd.newBuild)}><IconNew size={18} /> New build</button>
-          <button className="btn primary" onClick={run(cmd.share)}><IconShare size={18} /> Share link</button>
+          <button className="btn" onClick={run(cmd.save)}><IconCheck size={18} /> {t('file.save')}</button>
+          <button className="btn" onClick={run(cmd.saveAsCopy)}><IconDuplicate size={18} /> {t('file.savecopy')}</button>
+          <button className="btn" onClick={run(cmd.newBuild)}><IconNew size={18} /> {t('file.new')}</button>
+          <button className="btn primary" onClick={run(cmd.share)}><IconShare size={18} /> {t('pm.sharelink')}</button>
         </div>
       </div>
       <div className="sheet-section">
-        <div className="sheet-label">Create</div>
+        <div className="sheet-label">{t('pm.create')}</div>
         <PhotoSheetButton onBefore={() => { commitName(); closeSheet(); }} />
       </div>
       <div className="sheet-section">
-        <div className="sheet-label">Camera</div>
+        <div className="sheet-label">{t('pm.camera')}</div>
         <div className="grid-buttons">
           {CAMERAS.map((c) => (
             <button key={c.id} className="btn" disabled={viewMode === '2d'} onClick={run(() => engine.setCameraPreset(c.id))}>
-              {c.label}
+              {t(c.labelKey)}
             </button>
           ))}
-          <button className="btn" onClick={run(cmd.fit)}><IconFit size={18} /> Fit all</button>
+          <button className="btn" onClick={run(cmd.fit)}><IconFit size={18} /> {t('pm.fitall')}</button>
         </div>
       </div>
       <div className="sheet-section">
-        <div className="sheet-label">File</div>
+        <div className="sheet-label">{t('pm.file')}</div>
         <div className="list-buttons">
-          <button className="btn" onClick={run(cmd.importFile)}><IconImport size={18} /> Import .ldr</button>
-          <button className="btn" onClick={run(cmd.exportFile)}><IconExport size={18} /> Export .ldr</button>
+          <button className="btn" onClick={run(cmd.importFile)}><IconImport size={18} /> {t('file.import')}</button>
+          <button className="btn" onClick={run(cmd.exportFile)}><IconExport size={18} /> {t('file.export')}</button>
           <a className="btn" href="/"><IconBack size={18} /> {t('nav.scanner')}</a>
         </div>
       </div>
       <div className="sheet-section">
-        <div className="sheet-label">Tools</div>
+        <div className="sheet-label">{t('pm.tools')}</div>
         <div className="list-buttons">
-          <button className="btn" onClick={run(() => useEditor.getState().setTool('paint'))}><IconPaint size={18} /> Paint brush</button>
-          <button className="btn" onClick={run(actions.selectAll)}><IconHand size={18} /> Select all</button>
+          <button className="btn" onClick={run(() => useEditor.getState().setTool('paint'))}><IconPaint size={18} /> {t('pm.paintbrush')}</button>
+          <button className="btn" onClick={run(actions.selectAll)}><IconHand size={18} /> {t('pm.selectall')}</button>
         </div>
       </div>
       <div className="sheet-section">
-        <div className="sheet-label">Settings</div>
+        <div className="sheet-label">{t('pm.settings')}</div>
         <label className="toggle-row">
           <input type="checkbox" checked={prefs.haptics} onChange={(e) => prefs.set('haptics', e.target.checked)} />
           <IconVibrate size={18} />
-          <span>Vibration feedback{canVibrate() ? '' : ' (not supported on this device)'}</span>
+          <span>{t('pm.haptics')}{canVibrate() ? '' : t('pm.haptics.no')}</span>
         </label>
         <label className="toggle-row">
           <input type="checkbox" checked={prefs.showAllParts} onChange={(e) => prefs.set('showAllParts', e.target.checked)} />
-          <span>Show Duplo, Modulex &amp; other systems in the part picker</span>
+          <span>{t('pm.showallparts')}</span>
         </label>
-        <button className="btn" onClick={() => { prefs.resetTips(); closeSheet(); }}>Show tips again</button>
+        <button className="btn" onClick={() => { prefs.resetTips(); closeSheet(); }}>{t('pm.tips')}</button>
       </div>
     </Sheet>
   );

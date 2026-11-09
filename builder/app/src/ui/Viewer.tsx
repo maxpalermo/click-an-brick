@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { t, tp } from '../i18n';
 import { api } from '../api/client';
 import { fromLdr } from '../model/ldraw';
 import type { Model } from '../model/types';
@@ -74,7 +75,7 @@ export function Viewer({ id }: { id: string }) {
     return (
       <div className="viewer-center panel">
         <Spinner size={24} />
-        <p>Opening shared build…</p>
+        <p>{t('vw.loading')}</p>
       </div>
     );
   }
@@ -82,15 +83,13 @@ export function Viewer({ id }: { id: string }) {
     return (
       <div className="viewer-center panel">
         <Logo size={48} />
-        <h2>{state.notFound ? "We couldn't find that build" : "Couldn't load this build"}</h2>
+        <h2>{state.notFound ? t('vw.notfound') : t('vw.loaderr')}</h2>
         <p className="muted">
-          {state.notFound
-            ? 'The link may be mistyped or the build was removed.'
-            : 'Check your connection and try again.'}
+          {state.notFound ? t('vw.notfound.desc') : t('vw.loaderr.desc')}
         </p>
         <div className="row">
-          {!state.notFound && <button className="btn" onClick={() => setAttempt((n) => n + 1)}>Try again</button>}
-          <a className="btn primary" href="#/">Open Brickyard</a>
+          {!state.notFound && <button className="btn" onClick={() => setAttempt((n) => n + 1)}>{t('vw.retry')}</button>}
+          <a className="btn primary" href="#/">{t('vw.open')}</a>
         </div>
       </div>
     );
@@ -104,8 +103,8 @@ export function Viewer({ id }: { id: string }) {
     const saved = await saveModelAsNew(model, { ldr, shareId: id });
     setKept(saved ? 'saved' : 'idle');
     if (saved) {
-      toast(`Saved “${saved.name}” to My builds`, 'success', 4500, {
-        label: 'Show',
+      toast(t('vw.saved', { name: saved.name }), 'success', 4500, {
+        label: t('vw.show'),
         run: () => {
           navigate('#/');
           openMyBuilds();
@@ -116,49 +115,49 @@ export function Viewer({ id }: { id: string }) {
   const doRemix = () => {
     remix(model);
     navigate('#/');
-    toast('Copied into your editor — have fun remixing! (Undo returns to your build)', 'success', 4500);
+    toast(t('vw.remixed'), 'success', 4500);
   };
 
   return (
     <>
       <header className="topbar viewer-bar panel">
-        <a className="brand" href="#/" aria-label="Open Brickyard">
+        <a className="brand" href="#/" aria-label={t('vw.open')}>
           <Logo size={30} />
           {!isPhone && <span className="brand-name">Brickyard</span>}
         </a>
         <div className="viewer-title">
-          <strong>{model.name || 'Shared build'}</strong>
-          <small>{model.bricks.length.toLocaleString()} bricks{model.author && model.author !== 'Brickyard' ? ` · by ${model.author}` : ''}</small>
+          <strong>{model.name || t('vw.shared')}</strong>
+          <small>{tp('status.bricks', model.bricks.length)}{model.author && model.author !== 'Brickyard' ? t('vw.by', { name: model.author }) : ''}</small>
         </div>
         <div className="spacer" />
-        <Menu title="Camera" icon={<IconCamera />}>
+        <Menu title={t('cam.menu')} icon={<IconCamera />}>
           {(close) => CAMERAS.map((c) => (
-            <button key={c.id} role="menuitem" onClick={() => { engine.setCameraPreset(c.id); close(); }}>{c.label}</button>
+            <button key={c.id} role="menuitem" onClick={() => { engine.setCameraPreset(c.id); close(); }}>{t(c.labelKey)}</button>
           ))}
         </Menu>
-        <button className="icon-btn" onClick={() => engine.zoomToFit()} title="Zoom to fit" aria-label="Zoom to fit"><IconFit /></button>
+        <button className="icon-btn" onClick={() => engine.zoomToFit()} title={t('top.fit')} aria-label={t('pm.fitall')}><IconFit /></button>
         <button
           className={isPhone ? 'icon-btn' : 'btn'}
           onClick={() => void doKeep()}
           disabled={kept !== 'idle'}
-          title="Save a copy to My builds"
-          aria-label={kept === 'saved' ? 'Saved to My builds' : 'Save to My builds'}
+          title={t('vw.keep.title')}
+          aria-label={kept === 'saved' ? t('save.savedtitle') : t('vw.keep')}
         >
           {kept === 'saving' ? <Spinner size={16} /> : kept === 'saved' ? <IconCheck size={18} /> : <IconGrid size={18} />}
-          {!isPhone && (kept === 'saved' ? 'In My builds' : 'Save to My builds')}
+          {!isPhone && (kept === 'saved' ? t('vw.keep.saved') : t('vw.keep'))}
         </button>
-        <button className="btn primary" onClick={doRemix}>Remix{isPhone ? '' : ' in my editor'}</button>
+        <button className="btn primary" onClick={doRemix}>{isPhone ? t('vw.remix') : t('vw.remix.long')}</button>
       </header>
 
       <aside className={`parts-panel panel ${listOpen ? 'open' : ''}`}>
         <button className="parts-toggle" onClick={() => setListOpen((o) => !o)} aria-expanded={listOpen}>
-          <span>Parts list</span>
+          <span>{t('vw.partslist')}</span>
           <IconChevron size={18} className={listOpen ? 'flip' : ''} />
         </button>
         {listOpen && <PartsList model={model} />}
         {listOpen && (
           <div className="parts-foot">
-            <a href="#/" className="link-btn">Open Brickyard</a>
+            <a href="#/" className="link-btn">{t('vw.open')}</a>
           </div>
         )}
       </aside>
@@ -193,7 +192,7 @@ function PartsList({ model }: { model: Model }) {
             <div className="pl-text">
               <span className="pl-name">{name ? tidyName(name) : g.part.replace(/\.dat$/i, '')}</span>
               <span className="pl-color">
-                {c && <Swatch color={c} size={12} />} {c?.name ?? `Colour ${g.color}`} · {g.part.replace(/\.dat$/i, '')}
+                {c && <Swatch color={c} size={12} />} {c?.name ?? `${t('palette.colour')} ${g.color}`} · {g.part.replace(/\.dat$/i, '')}
               </span>
             </div>
             <span className="pl-count">×{g.count}</span>

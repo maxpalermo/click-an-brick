@@ -1,4 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { catName, t, tp } from '../i18n';
 import type { CatalogPart } from '../model/types';
 import { useEditor } from '../model/store';
 import { POPULAR_PARTS } from './data';
@@ -149,21 +150,21 @@ export function Catalog({ onPicked }: { onPicked?: () => void }) {
               className={`chip ${c === category ? 'active' : ''}`}
               onClick={() => setCategory(c)}
             >
-              {c}
+              {catName(c)}
             </button>
           ))}
         </div>
       )}
       {status === 'error' && (
         <div className="catalog-note error">
-          Couldn't load the full catalog. Showing popular bricks.
-          <button className="btn small" onClick={retry}>Retry</button>
+          {t('cat.error')}
+          <button className="btn small" onClick={retry}>{t('cat.retry')}</button>
         </div>
       )}
-      {status === 'loading' && !parts.length && <div className="catalog-note">Loading catalog…</div>}
-      {query && <div className="catalog-count">{results.length.toLocaleString()} result{results.length === 1 ? '' : 's'}</div>}
+      {status === 'loading' && !parts.length && <div className="catalog-note">{t('cat.loading')}</div>}
+      {query && <div className="catalog-count">{tp('cat.results', results.length)}</div>}
       <PartGrid items={results} resetKey={`${category}|${deferredQuery}`} onPicked={onPicked} />
-      {query && !results.length && <div className="catalog-empty">No parts match “{query}”.</div>}
+      {query && !results.length && <div className="catalog-empty">{t('cat.empty', { q: query })}</div>}
     </div>
   );
 }
@@ -174,15 +175,15 @@ export function SearchBox({ value, onChange, autoFocus }: { value: string; onCha
       <IconSearch size={18} />
       <input
         type="search"
-        placeholder="Search: 2x4, slope, 3001"
+        placeholder={t('palette.search')}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        aria-label="Search parts"
+        aria-label={t('search.aria')}
         autoFocus={autoFocus}
         enterKeyHint="search"
       />
       {value && (
-        <button className="icon-btn ghost small" onClick={() => onChange('')} aria-label="Clear search">
+        <button className="icon-btn ghost small" onClick={() => onChange('')} aria-label={t('search.clear')}>
           <IconClose size={16} />
         </button>
       )}

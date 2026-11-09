@@ -2,6 +2,7 @@
 // selection. Phone: docked in the thumb zone, replacing the hotbar + bottom bar. Desktop: a
 // floating mini-toolbar over the canvas.
 import type { ReactNode } from 'react';
+import { t, tp } from '../i18n';
 import { useEditor } from '../model/store';
 import { useColors, useEngine } from './context';
 import { actions } from './engineBridge';
@@ -40,7 +41,7 @@ function ColourAct() {
     return b?.color ?? s.activeColor;
   });
   const c = colorByCode(colors, code);
-  return <ActBtn icon={c ? <Swatch color={c} size={24} /> : <span className="swatch" />} label="Colour" onClick={() => openSheet('colors')} />;
+  return <ActBtn icon={c ? <Swatch color={c} size={24} /> : <span className="swatch" />} label={t('ctx.colour')} onClick={() => openSheet('colors')} />;
 }
 
 /** Status chips above the bar: "Overlaps a brick", "Floating", "Adding to selection". */
@@ -51,19 +52,19 @@ function BarTags() {
   if (!blocked && !floating && !addMore) return null;
   return (
     <div className="bar-tags" aria-live="polite">
-      {blocked && <span className="bar-tag danger">Overlaps a brick</span>}
-      {!blocked && floating && <span className="bar-tag warn">Floating</span>}
+      {blocked && <span className="bar-tag danger">{t('ctx.blocked')}</span>}
+      {!blocked && floating && <span className="bar-tag warn">{t('ctx.floating')}</span>}
       {addMore && (
         <span className="bar-tag info">
-          Tap bricks to add
-          <button onClick={() => useUi.setState({ addMore: false })}>Done</button>
+          {t('ctx.addmore')}
+          <button onClick={() => useUi.setState({ addMore: false })}>{t('ctx.done')}</button>
         </span>
       )}
     </div>
   );
 }
 
-const STEP_LABEL: Record<NudgeStep, string> = { stud: '1 stud', half: '½ stud', brick: '1 brick' };
+const STEP_KEY: Record<NudgeStep, string> = { stud: 'nudge.step.stud', half: 'nudge.step.half', brick: 'nudge.step.brick' };
 const NEXT_STEP: Record<NudgeStep, NudgeStep> = { stud: 'half', half: 'brick', brick: 'stud' };
 
 function NudgeBtn({ label, children, axis, dir }: { label: string; children: ReactNode; axis: 'x' | 'y' | 'z'; dir: '+' | '-' }) {
@@ -82,16 +83,16 @@ export function NudgePad() {
   const setPref = usePrefs((s) => s.set);
   return (
     <div className="nudge-pad panel" role="toolbar" aria-label="Nudge">
-      <NudgeBtn label="Move left" axis="x" dir="-"><IconArrowLeft size={20} /></NudgeBtn>
-      <NudgeBtn label="Move away" axis="z" dir="+"><IconArrowUp size={20} /></NudgeBtn>
-      <NudgeBtn label="Move closer" axis="z" dir="-"><IconArrowDown size={20} /></NudgeBtn>
-      <NudgeBtn label="Move right" axis="x" dir="+"><IconArrowRight size={20} /></NudgeBtn>
+      <NudgeBtn label={t('nudge.left')} axis="x" dir="-"><IconArrowLeft size={20} /></NudgeBtn>
+      <NudgeBtn label={t('nudge.away')} axis="z" dir="+"><IconArrowUp size={20} /></NudgeBtn>
+      <NudgeBtn label={t('nudge.closer')} axis="z" dir="-"><IconArrowDown size={20} /></NudgeBtn>
+      <NudgeBtn label={t('nudge.right')} axis="x" dir="+"><IconArrowRight size={20} /></NudgeBtn>
       <span className="nudge-sep" />
-      <NudgeBtn label="Lift" axis="y" dir="+"><IconLift size={20} /></NudgeBtn>
-      <NudgeBtn label="Lower" axis="y" dir="-"><IconLower size={20} /></NudgeBtn>
-      <button className="nudge-step" onClick={() => setPref('nudgeStep', NEXT_STEP[step])} title="Step size">
-        <small>Step</small>
-        <span>{STEP_LABEL[step]}</span>
+      <NudgeBtn label={t('nudge.lift')} axis="y" dir="+"><IconLift size={20} /></NudgeBtn>
+      <NudgeBtn label={t('nudge.lower')} axis="y" dir="-"><IconLower size={20} /></NudgeBtn>
+      <button className="nudge-step" onClick={() => setPref('nudgeStep', NEXT_STEP[step])} title={t('nudge.step')}>
+        <small>{t('nudge.step')}</small>
+        <span>{t(STEP_KEY[step])}</span>
       </button>
     </div>
   );
@@ -108,10 +109,10 @@ function PlaceBtn({ big }: { big?: boolean }) {
       onClick={() => engine.confirmPending()}
       aria-disabled={blocked}
       data-blocked={blocked || undefined}
-      title={blocked ? 'Overlaps a brick — move it first' : 'Place (Enter)'}
+      title={blocked ? t('ctx.blocked.title') : `${t('ctx.place')} (Enter)`}
     >
       {blocked ? <IconClose size={20} /> : <IconCheck size={22} />}
-      <span>{blocked ? 'Overlaps' : 'Place'}</span>
+      <span>{blocked ? t('ctx.overlaps') : t('ctx.place')}</span>
     </button>
   );
 }
@@ -129,20 +130,20 @@ export function PhoneContextBar() {
       <BarTags />
       {(mode === 'pending' || nudgeSel) && <NudgePad />}
       {mode === 'pending' ? (
-        <div className="context-bar panel pending" role="toolbar" aria-label="Place brick">
-          <ActBtn icon={<IconClose size={22} />} label="Cancel" onClick={() => engine.cancelPending()} />
-          <ActBtn icon={<IconRotate size={22} />} label="Rotate" onClick={() => engine.rotate(1)} />
+        <div className="context-bar panel pending" role="toolbar" aria-label={t('ctx.place')}>
+          <ActBtn icon={<IconClose size={22} />} label={t('ctx.cancel')} onClick={() => engine.cancelPending()} />
+          <ActBtn icon={<IconRotate size={22} />} label={t('ctx.rotate')} onClick={() => engine.rotate(1)} />
           <ColourAct />
           <PlaceBtn big />
         </div>
       ) : (
-        <div className="context-bar panel selection" role="toolbar" aria-label={`${count} selected`}>
-          <ActBtn icon={<IconRotate size={22} />} label="Rotate" onClick={() => engine.rotate(1)} />
-          <ActBtn icon={<IconDuplicate size={22} />} label="Duplicate" onClick={() => actions.duplicate(engine)} />
+        <div className="context-bar panel selection" role="toolbar" aria-label={tp('status.selected', count)}>
+          <ActBtn icon={<IconRotate size={22} />} label={t('ctx.rotate')} onClick={() => engine.rotate(1)} />
+          <ActBtn icon={<IconDuplicate size={22} />} label={t('ctx.duplicate')} onClick={() => actions.duplicate(engine)} />
           <ColourAct />
           <ActBtn
             icon={<IconAddMore size={22} />}
-            label="Add more"
+            label={t('ctx.addmore.btn')}
             pressed={addMore}
             className={addMore ? 'on' : ''}
             onClick={() => {
@@ -151,8 +152,8 @@ export function PhoneContextBar() {
               useUi.setState({ addMore: !addMore });
             }}
           />
-          <ActBtn icon={<IconTrash size={22} />} label="Delete" className="danger" onClick={actions.deleteSelection} />
-          <ActBtn icon={<IconMore size={22} />} label="More" onClick={() => openSheet('selection-more')} />
+          <ActBtn icon={<IconTrash size={22} />} label={t('ctx.delete')} className="danger" onClick={actions.deleteSelection} />
+          <ActBtn icon={<IconMore size={22} />} label={t('ctx.more')} onClick={() => openSheet('selection-more')} />
         </div>
       )}
     </>
@@ -167,29 +168,29 @@ export function DesktopContextBar() {
   if (!mode) return null;
   const lift = (
     <>
-      <button className="icon-btn" onClick={() => actions.nudge(engine, 'y', '+')} title="Lift one plate (PageUp)" aria-label="Lift"><IconLift /></button>
-      <button className="icon-btn" onClick={() => actions.nudge(engine, 'y', '-')} title="Lower one plate (PageDown)" aria-label="Lower"><IconLower /></button>
+      <button className="icon-btn" onClick={() => actions.nudge(engine, 'y', '+')} title={t('ctx.lift')} aria-label={t('nudge.lift')}><IconLift /></button>
+      <button className="icon-btn" onClick={() => actions.nudge(engine, 'y', '-')} title={t('ctx.lower')} aria-label={t('nudge.lower')}><IconLower /></button>
     </>
   );
   return (
-    <div className="mini-toolbar panel" role="toolbar" aria-label={mode === 'pending' ? 'Place brick' : 'Selection'}>
+    <div className="mini-toolbar panel" role="toolbar" aria-label={mode === 'pending' ? t('ctx.place') : t('ph.sheet.selection')}>
       <BarTags />
       {mode === 'pending' ? (
         <>
-          <button className="icon-btn" onClick={() => engine.cancelPending()} title="Cancel (Esc)" aria-label="Cancel"><IconClose /></button>
-          <button className="icon-btn" onClick={() => engine.rotate(1)} title="Rotate (R)" aria-label="Rotate"><IconRotate /></button>
+          <button className="icon-btn" onClick={() => engine.cancelPending()} title={`${t('ctx.cancel')} (Esc)`} aria-label={t('ctx.cancel')}><IconClose /></button>
+          <button className="icon-btn" onClick={() => engine.rotate(1)} title={t('top.rotate')} aria-label={t('ctx.rotate')}><IconRotate /></button>
           {lift}
           <PlaceBtn />
         </>
       ) : (
         <>
-          <span className="mini-count">{count} selected</span>
-          <button className="icon-btn" onClick={() => engine.rotate(1)} title="Rotate (R)" aria-label="Rotate"><IconRotate /></button>
-          <button className="icon-btn" onClick={() => actions.duplicate(engine)} title="Duplicate (Ctrl+D)" aria-label="Duplicate"><IconDuplicate /></button>
+          <span className="mini-count">{tp('status.selected', count)}</span>
+          <button className="icon-btn" onClick={() => engine.rotate(1)} title={t('top.rotate')} aria-label={t('ctx.rotate')}><IconRotate /></button>
+          <button className="icon-btn" onClick={() => actions.duplicate(engine)} title={`${t('ctx.duplicate')} (Ctrl+D)`} aria-label={t('ctx.duplicate')}><IconDuplicate /></button>
           {lift}
-          <button className="icon-btn" onClick={() => actions.frameSelection(engine)} title="Frame selection (Shift+F)" aria-label="Frame selection"><IconFocus /></button>
-          <button className="icon-btn danger" onClick={actions.deleteSelection} title="Delete (Del)" aria-label="Delete"><IconTrash /></button>
-          <button className="icon-btn" onClick={() => useEditor.getState().select([])} title="Deselect (Esc)" aria-label="Deselect"><IconClose /></button>
+          <button className="icon-btn" onClick={() => actions.frameSelection(engine)} title={`${t('ctx.frame')} (Shift+F)`} aria-label={t('ctx.frame')}><IconFocus /></button>
+          <button className="icon-btn danger" onClick={actions.deleteSelection} title={`${t('ctx.delete')} (Del)`} aria-label={t('ctx.delete')}><IconTrash /></button>
+          <button className="icon-btn" onClick={() => useEditor.getState().select([])} title={`${t('ctx.deselect')} (Esc)`} aria-label={t('ctx.deselect')}><IconClose /></button>
         </>
       )}
     </div>

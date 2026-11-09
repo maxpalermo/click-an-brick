@@ -1,5 +1,6 @@
 // Phone part picker (half sheet, UX_REVIEW §3.4) and the recent/pinned parts hotbar (§3.2).
 import { useDeferredValue, useMemo, useState } from 'react';
+import { catName, t, tp } from '../i18n';
 import type { CatalogPart } from '../model/types';
 import { useEditor } from '../model/store';
 import { ALL, PartGrid, SearchBox, partLabel, partSize, tidyName, usePartSearch } from './Catalog';
@@ -70,13 +71,13 @@ export function PartPicker({ onPicked }: { onPicked: () => void }) {
         <div className="picker-gridhead">
           {category && !dq && (
             <button className="btn small" onClick={() => setCategory(null)}>
-              <IconBack size={16} /> {category}
+              <IconBack size={16} /> {catName(category)}
             </button>
           )}
-          <span className="catalog-count">{results.length.toLocaleString()} part{results.length === 1 ? '' : 's'}</span>
+          <span className="catalog-count">{tp('cat.parts', results.length)}</span>
         </div>
         <PartGrid items={results} resetKey={`${category}|${dq}`} onPicked={onPicked} />
-        {dq && !results.length && <div className="catalog-empty">No parts match “{dq}”.</div>}
+        {dq && !results.length && <div className="catalog-empty">{t('cat.empty', { q: dq })}</div>}
       </div>
     );
   }
@@ -88,18 +89,18 @@ export function PartPicker({ onPicked }: { onPicked: () => void }) {
       <SearchBox value={query} onChange={setQuery} />
       {status === 'error' && (
         <div className="catalog-note error">
-          Couldn't load the full catalog. <button className="btn small" onClick={retry}>Retry</button>
+          {t('cat.error')} <button className="btn small" onClick={retry}>{t('cat.retry')}</button>
         </div>
       )}
       <div className="picker-scroll">
-        <div className="segmented picker-types" role="radiogroup" aria-label="Part type">
-          {TYPES.map((t) => (
-            <button key={t} role="radio" aria-checked={t === type} className={t === type ? 'active' : ''} onClick={() => setType(t)}>
-              {t}
+        <div className="segmented picker-types" role="radiogroup" aria-label={t('ph.parts')}>
+          {TYPES.map((ty) => (
+            <button key={ty} role="radio" aria-checked={ty === type} className={ty === type ? 'active' : ''} onClick={() => setType(ty)}>
+              {catName(ty)}
             </button>
           ))}
         </div>
-        <div className="sheet-label">Size · one tap arms the part</div>
+        <div className="sheet-label">{t('cat.size')}</div>
         <div className="size-chips">
           {SIZES.filter((s) => row.has(s)).map((s) => {
             const p = row.get(s)!.part;
@@ -114,14 +115,14 @@ export function PartPicker({ onPicked }: { onPicked: () => void }) {
               </button>
             );
           })}
-          <button className="size-chip more" onClick={() => setCategory(type)}>more</button>
+          <button className="size-chip more" onClick={() => setCategory(type)}>{t('cat.morechip')}</button>
         </div>
         <PinnedRecent onArm={arm} color={activeColor} activePart={activePart} />
-        <div className="sheet-label">More categories</div>
+        <div className="sheet-label">{t('cat.more')}</div>
         <div className="chips wrap">
           {more.map((c) => (
             <button key={c} className="chip" onClick={() => setCategory(c)}>
-              {c === ALL ? 'All parts…' : c}
+              {c === ALL ? t('cat.allparts') : catName(c)}
             </button>
           ))}
         </div>
@@ -139,7 +140,7 @@ function PinnedRecent({ onArm, color, activePart }: { onArm(id: string): void; c
   if (!list.length) return null;
   return (
     <>
-      <div className="sheet-label">Pinned ★ · Recent <span className="label-hint">long-press = pin</span></div>
+      <div className="sheet-label">{t('cat.pinned')} <span className="label-hint">{t('cat.pin.hint')}</span></div>
       <div className="recent-row">
         {list.map((id) => (
           <RecentTile key={id} id={id} name={idx.get(id.toLowerCase())?.name} color={color} pinned={pinned.includes(id)} active={id === activePart} onArm={onArm} />
@@ -156,7 +157,7 @@ function RecentTile({ id, name, color, pinned, active, onArm }: { id: string; na
     () => {
       togglePin(id);
       haptic('longpress');
-      toast(pinned ? 'Unpinned' : 'Pinned to the hotbar', 'info', 1500);
+      toast(pinned ? t('cat.unpinned.toast') : t('cat.pinned.toast'), 'info', 1500);
     },
   );
   const label = name ? partLabel(name) : id.replace(/\.dat$/i, '');
@@ -180,7 +181,7 @@ export function Hotbar({ variant }: { variant: 'phone' | 'desktop' }) {
   const idx = partIndex(parts);
   const list = hotbarParts({ recentParts: recent, pinnedParts: pinned });
   return (
-    <div className={`hotbar ${variant} ${variant === 'phone' ? 'panel' : ''}`} role="toolbar" aria-label="Recent parts">
+    <div className={`hotbar ${variant} ${variant === 'phone' ? 'panel' : ''}`} role="toolbar" aria-label={t('side.recent')}>
       {list.map((id, i) => (
         <HotbarSlot
           key={id}
@@ -194,14 +195,14 @@ export function Hotbar({ variant }: { variant: 'phone' | 'desktop' }) {
           onPin={() => {
             togglePin(id);
             haptic('longpress');
-            toast(pinned.includes(id) ? 'Unpinned' : 'Pinned', 'info', 1400);
+            toast(pinned.includes(id) ? t('cat.unpinned.short') : t('cat.pinned.short'), 'info', 1400);
           }}
         />
       ))}
       {variant === 'phone' && (
-        <button className="hotbar-all" onClick={() => openSheet('parts')} aria-label="All parts">
+        <button className="hotbar-all" onClick={() => openSheet('parts')} aria-label={t('cat.allparts')}>
           <IconGrid size={20} />
-          <span>All</span>
+          <span>{t('palette.tab.all')}</span>
         </button>
       )}
     </div>

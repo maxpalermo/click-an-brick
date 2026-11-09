@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { lang, setLang, t } from '../i18n';
+import { lang, setLang, t, tp } from '../i18n';
 import type { Tool } from '../model/types';
 import { BRICK_H, PLATE_H } from '../model/types';
 import { hasUnsavedChanges, useEditor } from '../model/store';
@@ -17,18 +17,18 @@ import { PhotoTopBarButton } from '../photo/ui/EntryPoints';
 import { actions, haptic } from './engineBridge';
 import { openSheet, usePrefs, useUi } from './prefs';
 
-export const TOOLS: Array<{ id: Tool; label: string; key: string; Icon: (p: { size?: number }) => JSX.Element }> = [
-  { id: 'place', label: 'Place', key: 'B', Icon: IconPlace },
-  { id: 'select', label: 'Select', key: 'V', Icon: IconSelect },
-  { id: 'paint', label: 'Paint', key: 'P', Icon: IconPaint },
-  { id: 'erase', label: 'Erase', key: 'E', Icon: IconErase },
+export const TOOLS: Array<{ id: Tool; labelKey: string; key: string; Icon: (p: { size?: number }) => JSX.Element }> = [
+  { id: 'place', labelKey: 'tool.place', key: 'B', Icon: IconPlace },
+  { id: 'select', labelKey: 'tool.select', key: 'V', Icon: IconSelect },
+  { id: 'paint', labelKey: 'tool.paint', key: 'P', Icon: IconPaint },
+  { id: 'erase', labelKey: 'tool.erase', key: 'E', Icon: IconErase },
 ];
 
-export const CAMERAS: Array<{ id: 'iso' | 'front' | 'side' | 'top'; label: string }> = [
-  { id: 'iso', label: 'Isometric' },
-  { id: 'front', label: 'Front' },
-  { id: 'side', label: 'Side' },
-  { id: 'top', label: 'Top' },
+export const CAMERAS: Array<{ id: 'iso' | 'front' | 'side' | 'top'; labelKey: string }> = [
+  { id: 'iso', labelKey: 'cam.iso' },
+  { id: 'front', labelKey: 'cam.front' },
+  { id: 'side', labelKey: 'cam.side' },
+  { id: 'top', labelKey: 'cam.top' },
 ];
 
 /** Shared editor commands used by both desktop and phone layouts. */
@@ -38,7 +38,7 @@ export function useEditorCommands(opts: { onShare(): void }) {
     share() {
       const { model } = useEditor.getState();
       if (!model.bricks.length) {
-        toast('Add a few bricks first, then share your build!', 'info');
+        toast(t('toast.share.empty'), 'info');
         return;
       }
       opts.onShare();
@@ -62,21 +62,21 @@ export function useEditorCommands(opts: { onShare(): void }) {
         const m = await pickLdrFile();
         if (!m) return;
         if (!m.bricks.length) {
-          toast("That file doesn't contain any bricks.", 'error');
+          toast(t('toast.import.empty'), 'error');
           return;
         }
         // A new build that is not in My builds yet: recorded as an import when first saved (not auto-saved).
         useEditor.getState().switchBuild(m, { buildSource: 'import' });
-        toast(`Imported ${m.bricks.length.toLocaleString()} bricks — Undo to go back.`, 'success');
+        toast(t('toast.import.ok', { n: m.bricks.length.toLocaleString() }), 'success');
         window.setTimeout(() => engine.zoomToFit(), 50);
       } catch {
-        toast("Couldn't read that file.", 'error');
+        toast(t('toast.import.err'), 'error');
       }
     },
     exportFile() {
       const { model } = useEditor.getState();
       exportLdr(model);
-      toast(`Exported ${model.name || 'build'}.ldr`, 'success');
+      toast(t('toast.export.ok', { name: model.name || 'build' }), 'success');
     },
     rotate(dir: 1 | -1 = 1) {
       engine.rotate(dir);
@@ -90,7 +90,7 @@ export type EditorCommands = ReturnType<typeof useEditorCommands>;
 
 export function Brand() {
   return (
-    <a className="brand" href="#/" aria-label="Brickyard home">
+    <a className="brand" href="#/" aria-label="Brickyard">
       <Logo size={30} />
       <span className="brand-name">Brickyard</span>
     </a>
@@ -133,12 +133,12 @@ export function SaveState({ compact }: { compact?: boolean }) {
   const linked = useEditor((s) => !!s.buildId);
   const unsaved = useEditor((s) => hasUnsavedChanges(s));
   const empty = useEditor((s) => !s.model.bricks.length);
-  if (saving) return <span className="save-state saving"><Spinner size={12} /> {compact ? '' : 'Saving…'}</span>;
-  if (!unsaved && linked) return <span className="save-state saved" title="Saved to My builds"><IconCheck size={14} />{!compact && <span className="save-label">Saved</span>}</span>;
+  if (saving) return <span className="save-state saving"><Spinner size={12} /> {compact ? '' : t('save.saving')}</span>;
+  if (!unsaved && linked) return <span className="save-state saved" title={t('save.savedtitle')}><IconCheck size={14} />{!compact && <span className="save-label">{t('save.saved')}</span>}</span>;
   if (empty || !unsaved) return null;
   return (
-    <button className="save-state unsaved" onClick={() => void saveCurrent()} title="Save to My builds (Ctrl+S)">
-      <span className="dot" /> {linked ? 'Unsaved changes' : 'Not saved yet'}
+    <button className="save-state unsaved" onClick={() => void saveCurrent()} title={t('save.title')}>
+      <span className="dot" /> {linked ? t('save.unsaved') : t('save.notsaved')}
     </button>
   );
 }
@@ -156,12 +156,12 @@ export function UndoRedo() {
         className="icon-btn"
         onClick={() => (engine.getPending().active ? engine.cancelPending() : undo())}
         disabled={!canUndo}
-        title={pending ? 'Cancel the pending brick' : 'Undo (Ctrl+Z)'}
-        aria-label="Undo"
+        title={pending ? t('top.cancelpending') : t('top.undo')}
+        aria-label={t('nav.undo')}
       >
         <IconUndo />
       </button>
-      <button className="icon-btn" onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Shift+Z)" aria-label="Redo">
+      <button className="icon-btn" onClick={redo} disabled={!canRedo} title={t('top.redo')} aria-label={t('nav.redo')}>
         <IconRedo />
       </button>
     </div>
@@ -172,8 +172,8 @@ export function ToolPicker({ big, onPicked }: { big?: boolean; onPicked?: () => 
   const tool = useEditor((s) => s.tool);
   const setTool = useEditor((s) => s.setTool);
   return (
-    <div className={`segmented ${big ? 'big' : ''}`} role="radiogroup" aria-label="Tool">
-      {TOOLS.map(({ id, label, key, Icon }) => (
+    <div className={`segmented ${big ? 'big' : ''}`} role="radiogroup" aria-label={t('pm.tools')}>
+      {TOOLS.map(({ id, labelKey, key, Icon }) => (
         <button
           key={id}
           role="radio"
@@ -183,10 +183,10 @@ export function ToolPicker({ big, onPicked }: { big?: boolean; onPicked?: () => 
             setTool(id);
             onPicked?.();
           }}
-          title={`${label} (${key})`}
+          title={`${t(labelKey)} (${key})`}
         >
           <Icon size={big ? 24 : 18} />
-          <span className="seg-label">{label}</span>
+          <span className="seg-label">{t(labelKey)}</span>
         </button>
       ))}
     </div>
@@ -197,7 +197,7 @@ export function ViewToggle() {
   const viewMode = useEditor((s) => s.viewMode);
   const setViewMode = useEditor((s) => s.setViewMode);
   return (
-    <div className="segmented" role="radiogroup" aria-label="View">
+    <div className="segmented" role="radiogroup" aria-label={t('view.mode')}>
       {(['3d', '2d'] as const).map((v) => (
         <button key={v} role="radio" aria-checked={viewMode === v} className={viewMode === v ? 'active' : ''} onClick={() => (v === '2d' ? enter2D() : setViewMode(v))}>
           <span className="seg-label always">{v.toUpperCase()}</span>
@@ -243,7 +243,7 @@ export function CameraMenu() {
   const engine = useEngine();
   const viewMode = useEditor((s) => s.viewMode);
   return (
-    <Menu title="Camera" icon={<IconCamera />}>
+    <Menu title={t('cam.menu')} icon={<IconCamera />}>
       {(close) =>
         CAMERAS.map((c) => (
           <button
@@ -255,7 +255,7 @@ export function CameraMenu() {
               close();
             }}
           >
-            {c.label}
+            {t(c.labelKey)}
           </button>
         ))
       }
@@ -273,46 +273,46 @@ export function DesktopTopBar({ cmd }: { cmd: EditorCommands }) {
       <UndoRedo />
       <div className="divider" />
       <ToolPicker />
-      <button className="icon-btn" onClick={() => cmd.rotate(1)} title="Rotate (R)" aria-label="Rotate">
+      <button className="icon-btn" onClick={() => cmd.rotate(1)} title={t('top.rotate')} aria-label={t('ctx.rotate')}>
         <IconRotate />
       </button>
       <div className="divider" />
       <ViewToggle />
       <CameraMenu />
-      <button className="icon-btn" onClick={cmd.fit} title="Zoom to fit (F)" aria-label="Zoom to fit">
+      <button className="icon-btn" onClick={cmd.fit} title={t('top.fit')} aria-label={t('pm.fitall')}>
         <IconFit />
       </button>
       <div className="spacer" />
-      <button className="icon-btn shortcuts-btn" onClick={() => openSheet('shortcuts')} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts"><IconKeyboard /></button>
+      <button className="icon-btn shortcuts-btn" onClick={() => openSheet('shortcuts')} title={t('top.shortcuts')} aria-label={t('ed.shortcuts')}><IconKeyboard /></button>
       <button className="btn mybuilds-btn" onClick={cmd.myBuilds} title={t('nav.builds')} aria-label={t('nav.builds')}><IconGrid size={18} /> <span className="mybuilds-label">{t('nav.builds')}</span></button>
       <PhotoTopBarButton />
       <a className="icon-btn with-label" href="/" title={t('nav.scanner')} aria-label={t('nav.scanner')}>
         <IconBack />
         <span>{t('nav.scanner')}</span>
       </a>
-      <Menu title="File" label={t('nav.file')} icon={<IconMore />}>
+      <Menu title={t('nav.file')} label={t('nav.file')} icon={<IconMore />}>
         {(close) => (
           <>
-            <button role="menuitem" onClick={() => { close(); cmd.newBuild(); }}><IconNew size={18} /> New build</button>
+            <button role="menuitem" onClick={() => { close(); cmd.newBuild(); }}><IconNew size={18} /> {t('file.new')}</button>
             <button role="menuitem" onClick={() => { close(); cmd.myBuilds(); }}><IconGrid size={18} /> {t('nav.builds')}…</button>
-            <button role="menuitem" onClick={() => { close(); cmd.save(); }}><IconCheck size={18} /> Save <span className="menu-key">Ctrl+S</span></button>
-            <button role="menuitem" onClick={() => { close(); cmd.saveAsCopy(); }}><IconDuplicate size={18} /> Save as copy</button>
+            <button role="menuitem" onClick={() => { close(); cmd.save(); }}><IconCheck size={18} /> {t('file.save')} <span className="menu-key">Ctrl+S</span></button>
+            <button role="menuitem" onClick={() => { close(); cmd.saveAsCopy(); }}><IconDuplicate size={18} /> {t('file.savecopy')}</button>
             <div className="menu-sep" role="separator" />
-            <button role="menuitem" onClick={() => { close(); cmd.importFile(); }}><IconImport size={18} /> Import .ldr…</button>
-            <button role="menuitem" onClick={() => { close(); cmd.exportFile(); }}><IconExport size={18} /> Export .ldr</button>
+            <button role="menuitem" onClick={() => { close(); cmd.importFile(); }}><IconImport size={18} /> {t('file.import')}</button>
+            <button role="menuitem" onClick={() => { close(); cmd.exportFile(); }}><IconExport size={18} /> {t('file.export')}</button>
             <div className="menu-sep" role="separator" />
             <button role="menuitem" onClick={() => { close(); usePrefs.getState().set('showAllParts', !usePrefs.getState().showAllParts); }}>
-              <IconBricks size={18} /> {usePrefs.getState().showAllParts ? 'Hide' : 'Show'} Duplo &amp; Modulex parts
+              <IconBricks size={18} /> {usePrefs.getState().showAllParts ? t('file.niche.hide') : t('file.niche.show')}
             </button>
-            <button role="menuitem" onClick={() => { close(); usePrefs.getState().resetTips(); }}><IconLayers size={18} /> Show tips again</button>
-            <button role="menuitem" onClick={() => { close(); openSheet('shortcuts'); }}><IconKeyboard size={18} /> Keyboard shortcuts (?)</button>
+            <button role="menuitem" onClick={() => { close(); usePrefs.getState().resetTips(); }}><IconLayers size={18} /> {t('file.tips')}</button>
+            <button role="menuitem" onClick={() => { close(); openSheet('shortcuts'); }}><IconKeyboard size={18} /> {t('top.shortcuts')}</button>
           </>
         )}
       </Menu>
       <button className="btn primary" onClick={cmd.share}>
         <IconShare size={18} /> {t('nav.share')}
-      <button className="icon-btn" onClick={() => { setLang(lang() === 'it' ? 'en' : 'it'); location.reload(); }} title={t('lang.label')} aria-label={t('lang.label')} style={{ fontWeight: 700, fontSize: 11 }}>{lang().toUpperCase()}</button>
       </button>
+      <button className="icon-btn" onClick={() => { setLang(lang() === 'it' ? 'en' : 'it'); location.reload(); }} title={t('lang.label')} aria-label={t('lang.label')} style={{ fontWeight: 700, fontSize: 11 }}>{lang().toUpperCase()}</button>
     </header>
   );
 }
@@ -336,11 +336,11 @@ export function LayerStepper() {
   const scrub = useRef<{ y: number; start: number; id: number } | null>(null);
   return (
     <div className="layer-stepper panel" aria-label="Layer" data-inset="right">
-      <button className="icon-btn" onClick={() => go(BRICK_H)} title="Up one brick (Shift+PageUp)" aria-label="Up one brick"><IconUpDouble /><small>+1 B</small></button>
-      <button className="icon-btn" onClick={() => go(PLATE_H)} title="Up one plate (PageUp)" aria-label="Up one plate"><IconUp /><small>+1 P</small></button>
+      <button className="icon-btn" onClick={() => go(BRICK_H)} title={t('layer.up.brick')} aria-label={t('layer.up.brick')}><IconUpDouble /><small>+1 B</small></button>
+      <button className="icon-btn" onClick={() => go(PLATE_H)} title={t('layer.up.plate')} aria-label={t('layer.up.plate')}><IconUp /><small>+1 P</small></button>
       <div
         className="layer-readout"
-        title={`Layer ${plates} (plates) — drag to scrub`}
+        title={t('layer.title', { n: plates })}
         role="slider"
         aria-label="Layer"
         aria-valuenow={plates}
@@ -368,11 +368,11 @@ export function LayerStepper() {
       >
         <IconLayers size={16} />
         <strong>{plates}</strong>
-        <small>plates</small>
-        <em>{plates ? `= ${platesAsBricks(plates)} brick${plates === 3 ? '' : 's'}` : 'ground'}</em>
+        <small>{t('layer.plates')}</small>
+        <em>{plates ? `= ${tp('layer.bricks', plates === 3 ? 1 : 2, { n: platesAsBricks(plates) })}` : t('layer.ground')}</em>
       </div>
-      <button className="icon-btn" onClick={() => go(-PLATE_H)} disabled={layerY >= 0} title="Down one plate (PageDown)" aria-label="Down one plate"><IconDown /><small>-1 P</small></button>
-      <button className="icon-btn" onClick={() => go(-BRICK_H)} disabled={layerY >= 0} title="Down one brick (Shift+PageDown)" aria-label="Down one brick"><IconDownDouble /><small>-1 B</small></button>
+      <button className="icon-btn" onClick={() => go(-PLATE_H)} disabled={layerY >= 0} title={t('layer.down.plate')} aria-label={t('layer.down.plate')}><IconDown /><small>-1 P</small></button>
+      <button className="icon-btn" onClick={() => go(-BRICK_H)} disabled={layerY >= 0} title={t('layer.down.brick')} aria-label={t('layer.down.brick')}><IconDownDouble /><small>-1 B</small></button>
     </div>
   );
 }
@@ -409,12 +409,12 @@ export function StatusPill() {
     <div className="status panel">
       <IconBricks size={16} />
       <span>
-        {count.toLocaleString()} brick{count === 1 ? '' : 's'}
-        {selected > 0 && <> · {selected} selected</>}
+        {tp('status.bricks', count)}
+        {selected > 0 && <> · {tp('status.selected', selected)}</>}
       </span>
       {pending > 0 && (
         <span className="status-loading">
-          <Spinner size={14} /> Loading {pending} part{pending === 1 ? '' : 's'}…
+          <Spinner size={14} /> {t('status.loading', { n: pending })}
         </span>
       )}
     </div>
@@ -422,22 +422,22 @@ export function StatusPill() {
 }
 
 export const SHORTCUTS: Array<[string, string]> = [
-  ['B / V / P / E', 'Place / Select / Paint / Erase'],
-  ['1 – 6', 'Arm a hotbar part'],
-  ['R / Shift+R', 'Rotate pending brick or selection ±90°'],
-  ['Arrow keys', 'Nudge 1 stud (camera-relative) · Alt = ½ stud'],
-  ['PageUp / PageDown', '2D: change layer · 3D: lift / lower one plate (Shift = brick)'],
-  ['Enter / Esc', 'Place the pending brick / cancel it, else deselect'],
-  ['Shift+click', 'Preview a brick before placing (pending)'],
-  ['Delete', 'Delete the selection'],
-  ['Ctrl+D', 'Duplicate the selection'],
-  ['Ctrl+A', 'Select all'],
-  ['I', "Eyedropper: use the selected brick's part + colour"],
-  ['F / Shift+F', 'Frame all / frame the selection'],
-  ['T · Shift+2 / Shift+3', 'Toggle 2D/3D · 2D / 3D'],
-  ['Ctrl+Z / Ctrl+Shift+Z', 'Undo / Redo'],
-  ['Ctrl+S / Ctrl+Shift+S', 'Save to My builds / Save as copy'],
-  ['?', 'This cheat-sheet'],
+  ['B / V / P / E', 'sc.tools'],
+  ['1 – 6', 'sc.hotbar'],
+  ['R / Shift+R', 'sc.rotate'],
+  ['Arrow keys', 'sc.nudge'],
+  ['PageUp / PageDown', 'sc.layers'],
+  ['Enter / Esc', 'sc.place'],
+  ['Shift+click', 'sc.preview'],
+  ['Delete', 'sc.delete'],
+  ['Ctrl+D', 'sc.duplicate'],
+  ['Ctrl+A', 'sc.selall'],
+  ['I', 'sc.eyedrop'],
+  ['F / Shift+F', 'sc.frame'],
+  ['T · Shift+2 / Shift+3', 'sc.view'],
+  ['Ctrl+Z / Ctrl+Shift+Z', 'sc.undo'],
+  ['Ctrl+S / Ctrl+Shift+S', 'sc.save'],
+  ['?', 'sc.help'],
 ];
 
 export function ShortcutsBody() {
@@ -447,7 +447,7 @@ export function ShortcutsBody() {
         {SHORTCUTS.map(([k, v]) => (
           <tr key={k}>
             <td><kbd>{k}</kbd></td>
-            <td>{v}</td>
+            <td>{t(v)}</td>
           </tr>
         ))}
       </tbody>

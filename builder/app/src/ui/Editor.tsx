@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { t } from '../i18n';
 import { useEditor } from '../model/store';
 import { Catalog } from './Catalog';
 import { useEngine } from './context';
@@ -36,9 +37,9 @@ export function Editor() {
         <>
           <DesktopTopBar cmd={cmd} />
           <aside className="sidebar panel" data-inset="left">
-            <div className="sidebar-title">Recent <span className="label-hint">keys 1–6 · right-click = pin</span></div>
+            <div className="sidebar-title">{t('side.recent')} <span className="label-hint">{t('side.recent.hint')}</span></div>
             <Hotbar variant="desktop" />
-            <div className="sidebar-title">Bricks</div>
+            <div className="sidebar-title">{t('side.bricks')}</div>
             <Catalog />
           </aside>
           <div className="palette-dock panel">
@@ -53,7 +54,7 @@ export function Editor() {
       <Tip />
       <PhotoFlowHost />
       {sheet === 'shortcuts' && (
-        <Modal title="Keyboard shortcuts" onClose={closeSheet} className="shortcuts-modal">
+        <Modal title={t('ed.shortcuts')} onClose={closeSheet} className="shortcuts-modal">
           <ShortcutsBody />
         </Modal>
       )}
